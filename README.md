@@ -1,6 +1,6 @@
 # STCL Linux Training 2025
 
-Welcome to the STCL (Systems Technology and Computing Lab) Linux Training program for 2025. This repository contains comprehensive training materials, guides, and exercises focused on Red Hat Enterprise Linux (RHEL) 10.
+Welcome to the STCL Linux Training program for 2025. This repository contains comprehensive training materials, guides, and exercises focused on Red Hat Enterprise Linux (RHEL) 10.
 
 ## 📋 Overview
 

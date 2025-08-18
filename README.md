@@ -22,6 +22,8 @@ By the end of this training, participants will be able to:
 ### Current Content
 
 - **[RHEL 10 Installation Guide](rhel10_installation.md)** - Comprehensive guide for setting up RHEL 10 in VirtualBox
+- **[Linux Foundation Course Outline](Linux%20Foundation%20-Course%20Outline.pdf)** - Official course curriculum and learning path from the Linux Foundation
+- **[Advanced Linux Commands Cheat Sheet](advanced-linux-commands-cheat-sheet-red-hat-developer.pdf)** - Quick reference guide for advanced Linux commands from Red Hat Developer
 
 ### Upcoming Modules
 
@@ -81,12 +83,14 @@ By the end of this training, participants will be able to:
 
 ```
 stcl-linux-training-2025/
-├── README.md                    # This file
-├── rhel10_installation.md       # Installation guide
-├── exercises/                   # Hands-on exercises (coming soon)
-├── scripts/                     # Utility scripts (coming soon)
-├── resources/                   # Additional resources (coming soon)
-└── labs/                        # Lab assignments (coming soon)
+├── README.md                                           # This file
+├── rhel10_installation.md                             # Installation guide
+├── Linux Foundation -Course Outline.pdf              # Official course curriculum
+├── advanced-linux-commands-cheat-sheet-red-hat-developer.pdf  # Command reference
+├── exercises/                                         # Hands-on exercises (coming soon)
+├── scripts/                                           # Utility scripts (coming soon)
+├── resources/                                         # Additional resources (coming soon)
+└── labs/                                              # Lab assignments (coming soon)
 ```
 
 ## 📝 Progress Tracking

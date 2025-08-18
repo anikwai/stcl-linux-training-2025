@@ -22,6 +22,7 @@ By the end of this training, participants will be able to:
 ### Current Content
 
 - **[RHEL 10 Installation Guide](rhel10_installation.md)** - Comprehensive guide for setting up RHEL 10 in VirtualBox
+- **[Debian Installation Screenshots](debinstall_all.tar)** - Complete visual guide with 131+ step-by-step screenshots for Debian installation
 - **[Linux Foundation Course Outline](Linux%20Foundation%20-Course%20Outline.pdf)** - Official course curriculum and learning path from the Linux Foundation
 - **[Advanced Linux Commands Cheat Sheet](advanced-linux-commands-cheat-sheet-red-hat-developer.pdf)** - Quick reference guide for advanced Linux commands from Red Hat Developer
 
@@ -72,6 +73,59 @@ By the end of this training, participants will be able to:
    - Download RHEL 10 ISO
    - Create your Red Hat developer account
 
+## 💿 Installation Instructions
+
+### RHEL 10 Installation
+For Red Hat Enterprise Linux installation, follow the comprehensive guide in [rhel10_installation.md](rhel10_installation.md) which includes:
+- VirtualBox setup and configuration
+- RHEL 10 ISO download and preparation
+- Step-by-step VM creation
+- Installation checklist and verification
+
+### Debian Installation Screenshots
+The repository includes a complete visual installation guide for Debian with 131+ step-by-step screenshots.
+
+#### Accessing the Debian Installation Guide
+
+1. **Extract the installation screenshots:**
+   ```bash
+   tar -xf debinstall_all.tar
+   ```
+
+2. **Organize screenshots by phase (recommended):**
+   ```bash
+   ./organize_screenshots.sh
+   ```
+   This creates a `debian_installation_phases/` directory with screenshots organized into 9 logical phases.
+
+3. **Follow the organized guide:**
+   - Navigate to `debian_installation_phases/Phase_1_Boot_and_Setup/` to begin
+   - Each phase directory contains relevant screenshots and a README with instructions
+   - Progress through phases sequentially for a structured installation experience
+
+4. **Alternative - View all screenshots sequentially:**
+   - Screenshots are numbered sequentially (debinstall_00100.png through debinstall_13400.png)
+   - Start with `debinstall_00100.png` and progress through each numbered screenshot
+   - Each screenshot shows the exact screen and selections needed
+
+#### Installation Phases Covered:
+1. **Boot and Initial Setup** (00100-00500) - Boot menu, language, keyboard
+2. **Network Configuration** (00600-01500) - Network setup and hostname
+3. **User and Password Setup** (01600-03000) - Account creation
+4. **Disk Partitioning** (03100-06000) - Storage configuration ⚠️ Critical
+5. **Base System Installation** (06100-08000) - Core system packages
+6. **Package Manager Setup** (08100-09500) - APT and mirrors
+7. **Software Selection** (09600-11500) - Desktop and applications
+8. **Bootloader Installation** (11600-12500) - GRUB setup
+9. **Installation Completion** (12600-13400) - Final steps and first boot
+
+#### Using the Screenshots
+- **Organized Method**: Use the phase-based structure for guided installation
+- **Sequential Method**: Follow screenshots chronologically by filename
+- Each image shows the current installation screen and any selections made
+- Phase directories include README files with context and key actions
+- Use as reference when installing Debian in VirtualBox or on physical hardware
+
 ## 📖 How to Use This Training
 
 1. **Sequential Learning**: Follow the modules in order as each builds upon previous knowledge
@@ -84,7 +138,9 @@ By the end of this training, participants will be able to:
 ```
 stcl-linux-training-2025/
 ├── README.md                                           # This file
-├── rhel10_installation.md                             # Installation guide
+├── rhel10_installation.md                             # RHEL 10 installation guide
+├── debinstall_all.tar                                 # Debian installation screenshots archive
+├── debinstall_*.png                                   # 131+ step-by-step Debian installation screenshots
 ├── Linux Foundation -Course Outline.pdf              # Official course curriculum
 ├── advanced-linux-commands-cheat-sheet-red-hat-developer.pdf  # Command reference
 ├── exercises/                                         # Hands-on exercises (coming soon)

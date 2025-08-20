@@ -305,95 +305,110 @@ graph TB
 
 ```mermaid
 flowchart TD
-    REQUEST[Access Request] --> DAC_PATH{DAC Check}
-    REQUEST --> MAC_PATH{MAC Check}  
-    REQUEST --> SELINUX_PATH{SELinux Check}
+    REQUEST[Access Request] --> DAC_CHECK{DAC Check}
+    REQUEST --> MAC_CHECK{MAC Check}
+    REQUEST --> SEL_CHECK{SELinux Check}
     
-    subgraph "DAC Decision Path"
-        DAC_PATH --> DAC_OWNER_CHECK{Owner?}
-        DAC_OWNER_CHECK --> |Yes| DAC_OWNER_PERM[Check Owner Permissions]
-        DAC_OWNER_CHECK --> |No| DAC_GROUP_CHECK{In Group?}
-        DAC_GROUP_CHECK --> |Yes| DAC_GROUP_PERM[Check Group Permissions]
-        DAC_GROUP_CHECK --> |No| DAC_OTHER_PERM[Check Other Permissions]
+    %% DAC Decision Path
+    subgraph "DAC_FLOW [DAC Decision Flow]"
+        DAC_CHECK --> DAC_OWNER{Is User Owner?}
+        DAC_OWNER -->|Yes| DAC_OWNER_PERM[Check Owner Permissions]
+        DAC_OWNER -->|No| DAC_GROUP{In Group?}
+        DAC_GROUP -->|Yes| DAC_GROUP_PERM[Check Group Permissions]
+        DAC_GROUP -->|No| DAC_OTHER_PERM[Check Other Permissions]
         
-        DAC_OWNER_PERM --> DAC_DECISION{Allow?}
-        DAC_GROUP_PERM --> DAC_DECISION
-        DAC_OTHER_PERM --> DAC_DECISION
+        DAC_OWNER_PERM --> DAC_RESULT{Permission Granted?}
+        DAC_GROUP_PERM --> DAC_RESULT
+        DAC_OTHER_PERM --> DAC_RESULT
         
-        DAC_DECISION --> |Yes| DAC_ALLOW[DAC: Allow]
-        DAC_DECISION --> |No| DAC_DENY[DAC: Deny]
+        DAC_RESULT -->|Yes| DAC_ALLOW[DAC: ALLOW]
+        DAC_RESULT -->|No| DAC_DENY[DAC: DENY]
     end
     
-    subgraph "MAC Decision Path"
-        MAC_PATH --> MAC_LABEL_CHECK[Check Security Labels]
-        MAC_LABEL_CHECK --> MAC_CLEARANCE[User Clearance Level]
-        MAC_CLEARANCE --> MAC_POLICY_EVAL{Policy Evaluation}
-        MAC_POLICY_EVAL --> MAC_BELL[Bell-LaPadula Rules]
-        MAC_POLICY_EVAL --> MAC_BIBA[Biba Rules]
+    %% MAC Decision Path  
+    subgraph "MAC_FLOW [MAC Decision Flow]"
+        MAC_CHECK --> MAC_LABELS[Check Security Labels]
+        MAC_LABELS --> MAC_CLEARANCE[User Clearance Level]
+        MAC_LABELS --> MAC_CLASSIFICATION[Object Classification]
         
-        MAC_BELL --> MAC_DECISION{System Policy<br/>Allow?}
-        MAC_BIBA --> MAC_DECISION
+        MAC_CLEARANCE --> MAC_RULES{Policy Rules}
+        MAC_CLASSIFICATION --> MAC_RULES
         
-        MAC_DECISION --> |Yes| MAC_ALLOW[MAC: Allow]
-        MAC_DECISION --> |No| MAC_DENY[MAC: Deny]
+        MAC_RULES --> MAC_BELL[Bell-LaPadula Check]
+        MAC_RULES --> MAC_BIBA[Biba Integrity Check]
+        
+        MAC_BELL --> MAC_RESULT{System Policy Allow?}
+        MAC_BIBA --> MAC_RESULT
+        
+        MAC_RESULT -->|Yes| MAC_ALLOW[MAC: ALLOW]
+        MAC_RESULT -->|No| MAC_DENY[MAC: DENY]
     end
     
-    subgraph "SELinux Decision Path"
-        SELINUX_PATH --> SEL_AVC_CHECK{AVC Cache Hit?}
-        SEL_AVC_CHECK --> |Yes| SEL_CACHED_DECISION[Use Cached Decision]
-        SEL_AVC_CHECK --> |No| SEL_SECURITY_SERVER[Query Security Server]
+    %% SELinux Decision Path
+    subgraph "SEL_FLOW [SELinux Decision Flow]"
+        SEL_CHECK --> SEL_AVC{AVC Cache Hit?}
         
-        SEL_SECURITY_SERVER --> SEL_CONTEXT_CHECK[Check Security Contexts]
-        SEL_CONTEXT_CHECK --> SEL_TE[Type Enforcement Rules]
-        SEL_CONTEXT_CHECK --> SEL_RBAC[RBAC Rules]
-        SEL_CONTEXT_CHECK --> SEL_MLS[MLS Rules (if enabled)]
+        SEL_AVC -->|Yes| SEL_CACHED[Use Cached Result]
+        SEL_AVC -->|No| SEL_SERVER[Query Security Server]
         
-        SEL_TE --> SEL_POLICY_DECISION{All Rules<br/>Allow?}
-        SEL_RBAC --> SEL_POLICY_DECISION
-        SEL_MLS --> SEL_POLICY_DECISION
-        SEL_CACHED_DECISION --> SEL_FINAL_DECISION{Final Decision}
+        SEL_SERVER --> SEL_CONTEXT[Check Security Contexts]
+        SEL_CONTEXT --> SEL_RULES[Evaluate Policy Rules]
         
-        SEL_POLICY_DECISION --> |Yes| SEL_CACHE_ALLOW[Cache & Allow]
-        SEL_POLICY_DECISION --> |No| SEL_CACHE_DENY[Cache & Deny]
+        SEL_RULES --> SEL_TE[Type Enforcement]
+        SEL_RULES --> SEL_RBAC[RBAC Check]
+        SEL_RULES --> SEL_MLS[MLS Check]
         
-        SEL_CACHE_ALLOW --> SEL_ALLOW[SELinux: Allow]
-        SEL_CACHE_DENY --> SEL_DENY[SELinux: Deny]
+        SEL_TE --> SEL_DECISION{All Rules Allow?}
+        SEL_RBAC --> SEL_DECISION
+        SEL_MLS --> SEL_DECISION
         
-        SEL_CACHE_ALLOW --> SEL_AVC_UPDATE[Update AVC Cache]
-        SEL_CACHE_DENY --> SEL_AVC_UPDATE
+        SEL_DECISION -->|Yes| SEL_CACHE_ALLOW[Cache Allow & Grant]
+        SEL_DECISION -->|No| SEL_CACHE_DENY[Cache Deny & Block]
         
-        SEL_ALLOW --> SEL_FINAL_DECISION
-        SEL_DENY --> SEL_FINAL_DECISION
+        SEL_CACHED --> SEL_FINAL_RESULT{Cached Decision}
+        SEL_CACHE_ALLOW --> SEL_ALLOW[SELinux: ALLOW]
+        SEL_CACHE_DENY --> SEL_DENY[SELinux: DENY]
+        SEL_FINAL_RESULT -->|Allow| SEL_ALLOW
+        SEL_FINAL_RESULT -->|Deny| SEL_DENY
     end
     
-    subgraph "Combined Decision"
-        COMBINED_LOGIC{All Systems<br/>Must Allow}
+    %% Combined Final Decision
+    subgraph "FINAL_LOGIC [Final Access Decision]"
+        GATE_LOGIC{All Systems Must Allow}
         
-        DAC_ALLOW --> COMBINED_LOGIC
-        MAC_ALLOW --> COMBINED_LOGIC
-        SEL_ALLOW --> COMBINED_LOGIC
-        
-        DAC_DENY --> FINAL_DENY[Final: Access Denied]
-        MAC_DENY --> FINAL_DENY
-        SEL_DENY --> FINAL_DENY
-        
-        COMBINED_LOGIC --> |All Allow| FINAL_ALLOW[Final: Access Granted]
-        COMBINED_LOGIC --> |Any Deny| FINAL_DENY
+        FINAL_GRANT[🟢 ACCESS GRANTED]
+        FINAL_BLOCK[🔴 ACCESS DENIED]
     end
     
-    classDef dacStyle fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef macStyle fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef selinuxStyle fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
-    classDef allowStyle fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
-    classDef denyStyle fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef decisionStyle fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    %% Connect outputs to final decision
+    DAC_ALLOW --> GATE_LOGIC
+    MAC_ALLOW --> GATE_LOGIC
+    SEL_ALLOW --> GATE_LOGIC
     
-    class DAC_PATH,DAC_OWNER_CHECK,DAC_GROUP_CHECK,DAC_OWNER_PERM,DAC_GROUP_PERM,DAC_OTHER_PERM,DAC_DECISION dacStyle
-    class MAC_PATH,MAC_LABEL_CHECK,MAC_CLEARANCE,MAC_POLICY_EVAL,MAC_BELL,MAC_BIBA,MAC_DECISION macStyle
-    class SELINUX_PATH,SEL_AVC_CHECK,SEL_CACHED_DECISION,SEL_SECURITY_SERVER,SEL_CONTEXT_CHECK,SEL_TE,SEL_RBAC,SEL_MLS,SEL_POLICY_DECISION,SEL_CACHE_ALLOW,SEL_CACHE_DENY,SEL_AVC_UPDATE,SEL_FINAL_DECISION selinuxStyle
-    class DAC_ALLOW,MAC_ALLOW,SEL_ALLOW,FINAL_ALLOW allowStyle
-    class DAC_DENY,MAC_DENY,SEL_DENY,FINAL_DENY denyStyle
-    class COMBINED_LOGIC decisionStyle
+    DAC_DENY --> FINAL_BLOCK
+    MAC_DENY --> FINAL_BLOCK
+    SEL_DENY --> FINAL_BLOCK
+    
+    GATE_LOGIC -->|All Allow| FINAL_GRANT
+    GATE_LOGIC -->|Any Deny| FINAL_BLOCK
+    
+    %% Styling
+    classDef dacStyle fill:#e1f5fe,stroke:#0277bd,stroke-width:2px,color:#000
+    classDef macStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    classDef selinuxStyle fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px,color:#000
+    classDef allowStyle fill:#c8e6c9,stroke:#1b5e20,stroke-width:3px,color:#000
+    classDef denyStyle fill:#ffcdd2,stroke:#c62828,stroke-width:3px,color:#000
+    classDef decisionStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    classDef processStyle fill:#f5f5f5,stroke:#616161,stroke-width:1px,color:#000
+    
+    %% Apply styles
+    class DAC_CHECK,DAC_OWNER,DAC_GROUP,DAC_OWNER_PERM,DAC_GROUP_PERM,DAC_OTHER_PERM,DAC_RESULT dacStyle
+    class MAC_CHECK,MAC_LABELS,MAC_CLEARANCE,MAC_CLASSIFICATION,MAC_RULES,MAC_BELL,MAC_BIBA,MAC_RESULT macStyle
+    class SEL_CHECK,SEL_AVC,SEL_CACHED,SEL_SERVER,SEL_CONTEXT,SEL_RULES,SEL_TE,SEL_RBAC,SEL_MLS,SEL_DECISION,SEL_CACHE_ALLOW,SEL_CACHE_DENY,SEL_FINAL_RESULT selinuxStyle
+    class DAC_ALLOW,MAC_ALLOW,SEL_ALLOW,FINAL_GRANT allowStyle
+    class DAC_DENY,MAC_DENY,SEL_DENY,FINAL_BLOCK denyStyle
+    class GATE_LOGIC decisionStyle
+    class REQUEST processStyle
 ```
 
 ## 6. Security Comparison Matrix

@@ -14,6 +14,9 @@ SSH key authentication provides a more secure and convenient way to connect to r
 ssh-keygen -b 4096 -t rsa
 ```
 
+or if you already have existing key just skip to Step 2
+
+
 **Command Breakdown:**
 - `ssh-keygen`: Tool for generating SSH key pairs
 - `-b 4096`: Specifies the key length (4096 bits for enhanced security)
